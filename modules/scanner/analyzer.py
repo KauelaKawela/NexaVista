@@ -1,8 +1,8 @@
 import re
 from urllib.parse import urlparse
 
-import clr
-from datas.data.categories import CATEGORIES
+from core import clr
+from core.categories import CATEGORIES
 
 
 _PRECOMPILED_PATTERNS = {

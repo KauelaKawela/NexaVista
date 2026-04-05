@@ -1,5 +1,6 @@
-import clr,re,json
-from datas.func import helper_func,formated
+import re, json
+from core import clr
+from core import helper_func,formated
 from datetime import datetime
 
 def wltf(link, kategori, uzanti, durum=None):
@@ -8,7 +9,7 @@ def wltf(link, kategori, uzanti, durum=None):
         if not link.startswith("http://") and not link.startswith("https://"):
             link = "https://" + link
         kategori = re.sub(r'[^\w\-_.]', '_', kategori)
-        filename = f"output/{kategori}_{timestep}.{uzanti.lstrip('.')}"
+        filename = f"outputs/{kategori}_{timestep}.{uzanti.lstrip('.')}"
         formatted = formated.formatla(link, uzanti, durum)
         with open(filename, "a", encoding="utf-8") as wf:
             if uzanti == "json":

@@ -1,5 +1,7 @@
-import clr,sys,os,json
-from datas.func import usec,formated,helper_func,extract,urlstus
+import sys, os, json
+from core import clr
+from modules.scanner import usec, extract, urlstus
+from core import formated, helper_func
 
 def gecersiz_links():
       print(rf"""{clr.am9}╠═════════════════════════════════════╗
@@ -12,7 +14,7 @@ def gecersiz_links():
       uzanti = usec.uzanti_sec()
       helper_func.int_kontrol()
       links = extract.extract_links(link_file)
-      gecersiz_path = f"output/gecersiz_links.{uzanti}"
+      gecersiz_path = f"outputs/gecersiz_links.{uzanti}"
       with open(gecersiz_path, "a", encoding="utf-8") as outfile:
              for link in links:
                   durum = urlstus.url_status_cek(link)

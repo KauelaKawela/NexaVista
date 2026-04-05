@@ -2,7 +2,7 @@ import random
 import time
 from dataclasses import dataclass, field
 
-from datas.func.config import (
+from core.config import (
     ACCEPT_LANGUAGES, ACCEPT_ENCODINGS, REFERERS,
     ACCEPT_HEADERS, DNT_VALUES, UPGRADE_INSECURE_VALUES, SEC_FETCH_MODES,
     SEC_FETCH_SITES, SEC_FETCH_DESTS,
@@ -110,8 +110,8 @@ def taze_oturum(tls_impersonation: bool = False, existing_session=None):
         try:
             from curl_cffi.requests import Session as CurlSession
             tarayici_listesi = (
-                "chrome110", "chrome116", "chrome119", "chrome120", "chrome124", "chrome131",
-                "safari17_0", "firefox117", "firefox120", "edge101"
+                "chrome110", "chrome116", "chrome119", "chrome120", "chrome124", "chrome131", "chrome136", "chrome142",
+                "safari17_0", "safari18_0", "firefox133", "firefox135", "firefox144", "edge101"
             )
             session = CurlSession(impersonate=random.choice(tarayici_listesi))
             return session, "curl_cffi"

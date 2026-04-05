@@ -1,4 +1,5 @@
-import clr,sys
+import sys
+from core import clr
 
 def uzanti_sec():
       try:

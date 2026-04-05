@@ -6,11 +6,11 @@ from datetime import datetime
 from urllib.parse import urlparse
 from dataclasses import asdict
 
-import clr
-from datas.func.models import LinkResult
-from datas.func.analyzer import score_color
-from datas.func.config import OUTPUT_DIR
-from datas.data.categories import CATEGORIES
+from core import clr
+from core.models import LinkResult
+from modules.scanner.analyzer import score_color
+from core.config import OUTPUT_DIR
+from core.categories import CATEGORIES
 
 
 def _strip_ansi(text: str) -> str:
@@ -70,9 +70,8 @@ def print_report(results: list[LinkResult], log_file_path: str = None):
 
     if unreachable:
         _out(f"\n  {clr.b}── Erisilemeyen URLler ────────────────────────────────{clr.r}")
-        for r in unreachable:
-            err = r.error or f"HTTP {r.status_code}"
-            _out(f"  {clr.k}✗{clr.r}  {r.url[:55]}  {clr.d}[{err}]{clr.r}")
+        _out(f"  {clr.k}Toplam {len(unreachable)} gecersiz link tespit edildi.{clr.r}")
+        _out(f"  {clr.d}(Detaylar icin lutfen {log_file_path.replace('result.log', 'invalid_links.json') if log_file_path else 'invalid_links.json'} dosyasina bakin){clr.r}")
 
     _out(f"\n{clr.am3}{'═'*70}{clr.r}\n")
 
@@ -83,10 +82,9 @@ def print_report(results: list[LinkResult], log_file_path: str = None):
     dupes = {d: rs for d, rs in domain_groups.items() if len(rs) > 1}
     if dupes:
         _out(f"  {clr.b}── Ayni Domain'e Ait Linkler (Duplikasyon) ────────────{clr.r}")
-        for domain, rs in dupes.items():
-            _out(f"\n  {clr.s}🔁 {domain}{clr.r} ({len(rs)} link):")
-            for r in rs:
-                _out(f"     {clr.d}→ {r.url}{clr.r}")
+        top_dupes = sorted(dupes.items(), key=lambda x: len(x[1]), reverse=True)
+        for domain, rs in top_dupes:
+            _out(f"  {clr.s}🔁 {domain}{clr.r} -> {len(rs)} link")
         _out(f"\n{clr.am3}{'═'*70}{clr.r}\n")
 
     if log_file_path:
@@ -154,7 +152,7 @@ def save_results(results: list[LinkResult], scan_dir: str):
     with open(summary_file, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
-    print(f"  {clr.y}✔ Sonuclar kaydedildi:{clr.r} {scan_dir}\n")
+    print(f"  {clr.y}1. Sonuclar JSON formatinda kaydedildi:{clr.r} {os.path.relpath(summary_file)}\n")
 
 
 def save_invalid_results(results: list[LinkResult], scan_dir: str):
@@ -172,7 +170,7 @@ def save_invalid_results(results: list[LinkResult], scan_dir: str):
     out_file = os.path.join(scan_dir, "invalid_links.json")
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
-    print(f"  {clr.y}✔ Gecersiz linkler kaydedildi:{clr.r} {out_file}\n")
+    print(f"  {clr.y}2. Gecersiz linkler ayrintili olarak kaydedildi:{clr.r} {os.path.relpath(out_file)}\n")
 
 
 def export_results(results: list[LinkResult], scan_dir: str, formats: list[str]):
@@ -186,8 +184,6 @@ def export_results(results: list[LinkResult], scan_dir: str, formats: list[str])
             _export_html(results, scan_dir)
         elif fmt == "xml":
             _export_xml(results, scan_dir)
-        elif fmt == "js":
-            _export_js(results, scan_dir)
         elif fmt == "json":
             pass
         else:
@@ -215,7 +211,7 @@ def _export_md(results: list[LinkResult], scan_dir: str):
 
     with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
-    print(f"  {clr.y}✔ MD disa aktarildi:{clr.r} {path}")
+    print(f"  {clr.y}3. MD raporu olusturuldu:{clr.r} {os.path.relpath(path)}")
 
 
 def _export_txt(results: list[LinkResult], scan_dir: str):
@@ -233,7 +229,7 @@ def _export_txt(results: list[LinkResult], scan_dir: str):
         lines.append("")
     with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
-    print(f"  {clr.y}✔ TXT disa aktarildi:{clr.r} {path}")
+    print(f"  {clr.y}4. TXT raporu olusturuldu:{clr.r} {os.path.relpath(path)}")
 
 
 def _export_html(results: list[LinkResult], scan_dir: str):
@@ -362,7 +358,7 @@ new Chart(ctxScore, {{
 </html>"""
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
-    print(f"  {clr.y}✔ HTML disa aktarildi:{clr.r} {path}")
+    print(f"  {clr.y}5. HTML raporu (Gorsellestirilmis) olusturuldu:{clr.r} {os.path.relpath(path)}")
 
 
 def _export_xml(results: list[LinkResult], scan_dir: str):
@@ -388,13 +384,4 @@ def _export_xml(results: list[LinkResult], scan_dir: str):
     tree = ET.ElementTree(root)
     ET.indent(tree, space="  ")
     tree.write(path, encoding="unicode", xml_declaration=True)
-    print(f"  {clr.y}✔ XML disa aktarildi:{clr.r} {path}")
-
-
-def _export_js(results: list[LinkResult], scan_dir: str):
-    path = os.path.join(scan_dir, "results.js")
-    data = json.dumps([asdict(r) for r in results], ensure_ascii=False, indent=2)
-    js_content = f"// NexaVista Tarama Sonuclari\n// Tarih: {datetime.now().isoformat()}\nconst nexavistaResults = {data};\n"
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(js_content)
-    print(f"  {clr.y}✔ JS disa aktarildi:{clr.r} {path}")
+    print(f"  {clr.y}6. XML verisi olusturuldu:{clr.r} {os.path.relpath(path)}")

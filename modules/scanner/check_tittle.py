@@ -1,5 +1,7 @@
-import clr,requests,os,sys,json
-from datas.func import usec,formated,extract,helper_func
+import requests, os, sys, json
+from core import clr
+from modules.scanner import usec, extract
+from core import formated, helper_func
 from bs4 import BeautifulSoup
 
 def baslik_getir(url):
@@ -20,7 +22,7 @@ def baslık_cek():
           sys.exit()
       uzanti = usec.uzanti_sec()
       helper_func.int_kontrol()
-      title_yolu = f"output/titles.{uzanti}"
+      title_yolu = f"outputs/titles.{uzanti}"
       links = extract.extract_links(link_file)
       with open(title_yolu,"a",encoding="utf-8") as cikti_file:
            for link in links:

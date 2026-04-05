@@ -1,5 +1,7 @@
-import clr,os,sys
-from datas.func import usec,helper_func,extract,urlstus,csf,wltf
+import os, sys
+from core import clr
+from modules.scanner import usec,extract,urlstus,csf,wltf
+from core import helper_func
 
 def kategorize_et():
       print(rf"""{clr.am9}╠═════════════════════════════════════╗
@@ -12,7 +14,8 @@ def kategorize_et():
           sys.exit()
       uzanti = usec.uzanti_sec()
       helper_func.int_kontrol()
-      keywords = helper_func.load_keywords("datas/data/keywords.json")
+      from core.categories import CATEGORIES
+      keywords = CATEGORIES
       links = extract.extract_links(link_file)
       for link in links:
             durum = urlstus.url_status_cek(link)

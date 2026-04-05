@@ -1,6 +1,7 @@
 import re
-import clr,sys
-from datas.func import helper_func
+import sys
+from core import clr
+from core import helper_func
 
 def extract_links(file_links):
     try:

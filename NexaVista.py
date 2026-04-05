@@ -2,18 +2,19 @@ import os
 import re
 import sys
 
-import clr
-from datas.func.config import setup_logging, log, OUTPUT_DIR, PROXY_LIST
-from datas.func.manager import NexaVista
-from datas.func.stealth import (
+from core import clr
+from core.config import setup_logging, log, OUTPUT_DIR, PROXY_LIST
+from modules.scanner.manager import NexaVista
+from core.stealth import (
     StealthConfig, STEALTH_OFF, STEALTH_MINIMAL,
     STEALTH_STANDARD, STEALTH_FULL,
 )
-from datas.func import reporter
-from datas.func import helper_func, extract, urlstus, csf, formated, usec, wltf
-from datas.func import check_tittle as ctl
-from datas.func import notfoundlinks as nfl
-from datas.func import proxy_check
+from modules.scanner import reporter
+from core import helper_func, formated
+from modules.scanner import extract, urlstus, csf, usec, wltf
+from modules.scanner import check_tittle as ctl
+from modules.scanner import notfoundlinks as nfl
+from modules.proxy_checker import proxy_check
 
 
 def banner():
@@ -45,9 +46,8 @@ def standart_tarama():
 
     urls = _url_girisi()
     if not urls:
-        input(f"{clr.am6}║\n╚══════ > Menuye donmek icin bir tusa basin.. {clr.r}")
-        main()
-        return
+        print(f"{clr.am6}║\n╚══════ > URL girilmedi. Cikis yapiliyor...{clr.r}")
+        sys.exit(0)
 
     from datetime import datetime
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -61,8 +61,9 @@ def standart_tarama():
 
     reporter.print_report(results, log_file_path=result_log_path)
     reporter.save_results(results, scan_output_dir)
+    reporter.save_invalid_results(results, scan_output_dir)
 
-    print(f"{clr.am7}╠═══════ > Disa aktarma formatlari (virgulle ayirin) [md,txt,html,xml,js]:{clr.r}")
+    print(f"{clr.am7}╠═══════ > Disa aktarma formatlari (virgulle ayirin) [md,txt,html,xml]:{clr.r}")
     fmt_input = input(f"{clr.am7}╠═══════ > {clr.r}").strip()
     if fmt_input:
         formats = [f.strip() for f in fmt_input.split(",")]
@@ -70,8 +71,8 @@ def standart_tarama():
 
     log.info(f"Scan complete: stealth={stealth_config.level}, {len(results)} URLs, output_dir={scan_output_dir}")
 
-    input(f"{clr.am6}║\n╚══════ > Menuye donmek icin bir tusa basin.. {clr.r}")
-    main()
+    print(f"{clr.am6}║\n╚══════ > Tarama tamamlandi. Cikis yapiliyor...{clr.r}")
+    sys.exit(0)
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -90,9 +91,8 @@ def gecersiz_tarama():
 
     urls = _url_girisi()
     if not urls:
-        input(f"{clr.am6}║\n╚══════ > Menuye donmek icin bir tusa basin.. {clr.r}")
-        main()
-        return
+        print(f"{clr.am6}║\n╚══════ > URL girilmedi. Cikis yapiliyor...{clr.r}")
+        sys.exit(0)
 
     from datetime import datetime
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -109,8 +109,8 @@ def gecersiz_tarama():
 
     log.info(f"Invalid scan complete: stealth={stealth_config.level}, {len(results)} URLs, output_dir={scan_output_dir}")
 
-    input(f"{clr.am6}║\n╚══════ > Menuye donmek icin bir tusa basin.. {clr.r}")
-    main()
+    print(f"{clr.am6}║\n╚══════ > Tarama tamamlandi. Cikis yapiliyor...{clr.r}")
+    sys.exit(0)
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -138,21 +138,19 @@ def kategori_elementleri():
     print(rf"""{clr.am9}╠═════════════════════════════════════╗
 {clr.am5}║     Kategori Sayilarini Goster      ║
 {clr.am9}╠═════════════════════════════════════╣""")
-    klasor = "datas/output"
+    klasor = "outputs"
     kategoriler = {}
     uzantilar = (".txt", ".json", ".csv", ".xml", ".html")
     if not os.path.isdir(klasor):
         print(f"{clr.am9}║\n║\n{clr.am5}╠════════════╝ {clr.k}Kategori klasoru bulunamadi!{clr.r}")
         helper_func.error_log_write("Kategori klasoru bulunamadi!")
-        input(f"{clr.am6}║\n╚══════ > Menuye donmek icin bir tusa basin.. {clr.r}")
-        main()
+        sys.exit(1)
         return
     dosyalar = [dosya for dosya in os.listdir(klasor) if dosya.endswith(uzantilar)]
     if not dosyalar:
         print(f"{clr.am9}║\n║\n{clr.am5}╠════════════╝ {clr.k}Kategori klasoru bos!{clr.r}")
         helper_func.error_log_write("Kategori klasoru bos!")
-        input(f"{clr.am6}║\n╚══════ > Menuye donmek icin bir tusa basin.. {clr.r}")
-        main()
+        sys.exit(1)
         return
     for dosya in dosyalar:
         kategori = "_".join(os.path.splitext(dosya)[0].split("_")[:-2])
@@ -170,8 +168,8 @@ def kategori_elementleri():
             helper_func.error_log_write(e)
     for kategori, sayi in kategoriler.items():
         print(f"{clr.am6}╠═ {kategori.upper():<20}{clr.r} ➜ {clr.am1}{sayi} link{clr.r}")
-    input(f"{clr.am4}║\n╚══════ > Menuye donmek icin bir tusa basin.. {clr.r}")
-    main()
+    print(f"{clr.am4}║\n╚══════ > Islemler tamamlandi. Cikis yapiliyor...{clr.r}")
+    sys.exit(0)
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -187,8 +185,8 @@ def yardim():
 {clr.am3}║ 6 - Her kategoride kac link oldugunu gosterir
 {clr.am2}║ 7 - Bu yardim menusunu gosterir
 {clr.am8}╠═════════════════════════════════════════════════╝""")
-    input(f"{clr.am3}║\n╚══════ > Menuye donmek icin tuslayın.. {clr.r}")
-    main()
+    print(f"{clr.am3}║\n╚══════ > Islemler tamamlandi. Cikis yapiliyor...{clr.r}")
+    sys.exit(0)
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -441,12 +439,21 @@ def _proxy_gizle(proxy: str) -> str:
 # ══════════════════════════════════════════════════════════════════
 # Menu Yonlendirme
 # ══════════════════════════════════════════════════════════════════
+
+def call_sms_bomber():
+    from modules.sms.sms_bomber import run_sms
+    run_sms()
+
+def call_ddos_attack():
+    from modules.ddos.ddos_attack import run_ddos
+    run_ddos()
+
 def MENU(secilmis):
     secim_haritasi = {
         "0": cikis,
         "1": standart_tarama,
-        "2": gecersiz_tarama,
-        "3": ctl.baslık_cek,
+        "2": call_sms_bomber,
+        "3": call_ddos_attack,
         "4": proxy_check.check_proxy,
         "5": kategori_elementleri,
         "6": yardim,
@@ -468,8 +475,8 @@ def main():
 {clr.am1}║          NexaVista - Menu           ║
 {clr.am3}╠═════════════════════════════════════╣
 {clr.am3}║ 1 - Standart Tarama                 ║
-{clr.am4}║ 2 - Gecersiz Link Tespiti           ║
-{clr.am5}║ 3 - Linklerden Baslik Cek           ║
+{clr.am4}║ 2 - SMS Bomber                      ║
+{clr.am5}║ 3 - DDoS Saldırı                    ║
 {clr.am5}║ 4 - Proxyleri Kontrol Et            ║
 {clr.am6}║ 5 - Kategori Sayilarini Goster      ║
 {clr.am7}║ 6 - Hakkinda / Yardim               ║

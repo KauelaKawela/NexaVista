@@ -8,14 +8,14 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 
-from datas.func.models import LinkResult
-from datas.func.config import USER_AGENTS, TIMEOUT, MAX_CONTENT_BYTES, log
-from datas.func.analyzer import categorize
-from datas.func.stealth import (
+from core.models import LinkResult
+from core.config import USER_AGENTS, TIMEOUT, MAX_CONTENT_BYTES, log
+from modules.scanner.analyzer import categorize
+from core.stealth import (
     StealthConfig, STEALTH_OFF,
     stealth_ayarla,
 )
-from datas.data.categories import SCORE_WEIGHTS
+from core.categories import SCORE_WEIGHTS
 
 
 class LinkScanner:

@@ -1,12 +1,12 @@
 import traceback,os,requests,json,sys
-import clr
+from core import clr
 from datetime import datetime
 
 def output_folder():
     pass
 
 def error_log_write(e):
-    log_dir = "datas/log"
+    log_dir = "outputs/logs"
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     anlik = datetime.now()
@@ -39,12 +39,15 @@ def int_kontrol():
 
 def load_hata_code():
       try:
-           with open("datas/data/hata_codes.json","r",encoding="utf-8") as hc:
+           # Default to core/hata_codes.json or empty if missing
+           path = "core/hata_codes.json"
+           if not os.path.exists(path):
+               return {}
+           with open(path,"r",encoding="utf-8") as hc:
                 return json.load(hc)
-      except FileNotFoundError as e:
-           print(f"{clr.am6}║\n║\n╚════════════╝{clr.r} 'hata_codes.json' {clr.k}hata kodu dosyasi bulunamadi!{clr.r}")
+      except Exception as e:
            error_log_write(e)
-           sys.exit()
+           return {}
 
 def load_categori(file_categori):
        try:
@@ -58,9 +61,11 @@ def load_categori(file_categori):
 
 def load_keywords(keys):
        try:
+           if not os.path.exists(keys):
+               # If it's the old datas path, try a sensible default or return empty
+               return {}
            with open(keys,"r",encoding="utf-8") as ky:
                return json.load(ky)
-       except FileNotFoundError as e:
-           print(f"{clr.am6}║\n║\n╚════════════╝{clr.r} '{keys}' {clr.k}dosyasi bulunamadi!{clr.r}")
+       except Exception as e:
            error_log_write(e)
-           sys.exit()
+           return {}

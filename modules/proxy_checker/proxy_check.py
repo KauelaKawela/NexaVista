@@ -1,6 +1,8 @@
 import requests
-import clr,os,sys
-from datas.func import helper_func,extract
+import os, sys
+from core import clr
+from core import helper_func
+from modules.scanner import extract
 
 def check_proxy():
       online_proxies = []

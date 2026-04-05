@@ -3,9 +3,9 @@ import logging
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-DATA_DIR    = os.path.join(BASE_DIR, "datas", "data")
-LOG_DIR     = os.path.join(BASE_DIR, "datas", "log")
-OUTPUT_DIR  = os.path.join(BASE_DIR, "datas", "output")
+DATA_DIR    = os.path.join(BASE_DIR, "core")
+LOG_DIR     = os.path.join(BASE_DIR, "outputs")
+OUTPUT_DIR  = os.path.join(BASE_DIR, "outputs")
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -208,19 +208,21 @@ MAX_CONTENT_BYTES = 500_000
 def setup_logging(ts: str) -> str:
     log_dir = os.path.join(LOG_DIR, f"scan_{ts}")
     os.makedirs(log_dir, exist_ok=True)
-
+    
     log_file = os.path.join(log_dir, "nexavista.log")
-
-    for handler in logging.root.handlers[:]:
-        logging.root.removeHandler(handler)
-
-    logging.basicConfig(
-        filename=log_file,
-        level=logging.INFO,
-        format="%(asctime)s [%(levelname)s] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
+    
+    # Configure the 'NexaVista' logger specifically instead of root
+    logger = logging.getLogger("NexaVista")
+    logger.setLevel(logging.INFO)
+    
+    # Remove old handlers to prevent duplicate logs across scans
+    if logger.hasHandlers():
+        logger.handlers.clear()
+        
+    fh = logging.FileHandler(log_file, encoding="utf-8")
+    fh.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"))
+    logger.addHandler(fh)
+    
     return log_dir
-
 
 log = logging.getLogger("NexaVista")

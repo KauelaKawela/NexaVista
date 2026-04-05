@@ -1,4 +1,5 @@
-import clr,sys
+import sys
+from core import clr
 
 def formatla(link, uzanti, durum=None):
     if uzanti.lower().strip() == "json":

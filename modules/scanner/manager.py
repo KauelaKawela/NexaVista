@@ -3,12 +3,12 @@ import threading
 from urllib.parse import urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-import clr
-from datas.func.models import LinkResult
-from datas.func.scanner import LinkScanner
-from datas.func.analyzer import score_color
-from datas.func.stealth import StealthConfig, STEALTH_OFF
-from datas.data.categories import CATEGORIES
+from core import clr
+from core.models import LinkResult
+from modules.scanner.scanner import LinkScanner
+from modules.scanner.analyzer import score_color
+from core.stealth import StealthConfig, STEALTH_OFF
+from core.categories import CATEGORIES
 
 
 class NexaVista:
